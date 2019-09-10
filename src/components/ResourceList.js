@@ -1,18 +1,11 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-const ResourceList = props => {
+//function which deals with all the hooks related logics
+// this funciton takes input and gives output
+const useResources = resource => {
   //initialize some state here
   const [resources, setResources] = useState([]); //initialized as empty array
-
-  //function to be called inside from useEffect
-  const fetchResource = async resource => {
-    const result = await axios.get(
-      `https://jsonplaceholder.typicode.com/${resource}`
-    );
-    // console.log(result.data);
-    setResources(result.data); // axios provides result inside of data
-  };
 
   //use effect will be called with a function which will run each time (componentDidMount() & componentDidUpdate())
   // this will run everytime the component is rendered or updated
@@ -23,16 +16,28 @@ const ResourceList = props => {
 
   useEffect(() => {
     //we must call this second function (or nothing)
-    fetchResource(props.resource);
-  }, [props.resource]);
+    (async resource => {
+      const result = await axios.get(
+        `https://jsonplaceholder.typicode.com/${resource}`
+      );
+      setResources(result.data); // axios provides result inside of data
+    })(resource);
+  }, [resource]);
+
+  return resources; //return resources saved inside of this function
+};
+
+//-----------------------------------------------
+const ResourceList = ({ resource }) => {
+  const resources = useResources(resource); //getting recources
 
   return (
     <div>
-      <div>
+      <ul>
         {resources.map(record => (
-          <li>{record.title}</li>
+          <li key={record.id}>{record.title}</li>
         ))}
-      </div>
+      </ul>
     </div>
   );
 };
